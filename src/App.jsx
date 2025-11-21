@@ -337,7 +337,7 @@ export default function EchoScribe() {
     }
   };
 
-  const sendAudioToDeepgram = async (audioBlob) => {
+ const sendAudioToDeepgram = async (audioBlob) => {
     setIsProcessing(true);
     const token = localStorage.getItem('token');
     
@@ -345,9 +345,14 @@ export default function EchoScribe() {
       const formData = new FormData();
       formData.append('audio', audioBlob);
 
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/transcribe`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: headers,
         body: formData,
       });
 
@@ -391,6 +396,11 @@ export default function EchoScribe() {
 
   const saveTranscription = async () => {
     if (!transcript.trim()) return;
+
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
 
     setIsSaving(true);
     const token = localStorage.getItem('token');
